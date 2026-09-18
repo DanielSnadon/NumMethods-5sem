@@ -1,0 +1,6 @@
+{
+  "lowerDiagonal": [2, -8, 6, 9],
+  "mainDiagonal": [-6, 10, 18, -17, 14],
+  "upperDiagonal": [6, -7, 9, -6],
+  "rightSide": [30, -31, 108, -114, 124]
+}
