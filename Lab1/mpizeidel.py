@@ -53,7 +53,7 @@ def mpi(iterationMatrix, constVector, epsilon, maxIterations):
     return previousSolution, maxIterations, False
 
 # That's it.
-def zeidelMethod(iterationMatrix, constVector, epsilon, maxIterations):
+def zeidel(iterationMatrix, constVector, epsilon, maxIterations):
     size = len(constVector)
     previousSolution = [0.0 for _ in range(size)]
 
@@ -88,7 +88,7 @@ def zeidelMethod(iterationMatrix, constVector, epsilon, maxIterations):
 
 def main():
     if len(sys.argv) != 2:
-        print("Ошибка ввода: верный ввод: python mpizeidel.py 2.json")
+        print("Ошибка ввода: верный ввод: python mpizeidel.py 3.json")
         return
 
     data = loadInputData(sys.argv[1])
@@ -100,8 +100,8 @@ def main():
 
     iterationMatrix, constVector = rebuild(matrix, rightSide)
 
-    mpiSolution, mpiIterations, mpiConverged = mpi(iterationMatrix, constVector, epsilon, maxIterations)
-    zeidelSolution, zeidelIterations, zeidelConverged = zeidelMethod(iterationMatrix, constVector, epsilon, maxIterations)
+    mpiSolution, mpiIterations, mpiSuccess = mpi(iterationMatrix, constVector, epsilon, maxIterations)
+    zeidelSolution, zeidelIterations, zeidelSuccess = zeidel(iterationMatrix, constVector, epsilon, maxIterations)
 
     lowerMatrix, upperMatrix, permutationMatrix, useless = lu(matrix)
     ref = solve(lowerMatrix, upperMatrix, permutationMatrix, rightSide)
@@ -112,20 +112,16 @@ def main():
     printVector("Эталонное решение через LU:", ref)
 
     print("\nМетод простых итераций:")
-    print(f"Сошёлся: {'да' if mpiConverged else 'нет'}")
+    print(f"Сошёлся: {'да' if mpiSuccess else 'нет'}")
     print(f"Количество итераций: {mpiIterations}")
     printVector("Решение:", mpiSolution)
 
     print("\nМетод Зейделя:")
-    print(f"Сошёлся: {'да' if zeidelConverged else 'нет'}")
+    print(f"Сошёлся: {'да' if zeidelSuccess else 'нет'}")
     print(f"Количество итераций: {zeidelIterations}")
     printVector("Решение:", zeidelSolution)
-    zeidelResidual = subtractVectors(
-        multiplyMatrixAndVector(matrix, zeidelSolution),
-        rightSide,
-    )
     
-    if mpiConverged and zeidelConverged:
+    if mpiSuccess and zeidelSuccess:
         if zeidelIterations < mpiIterations:
             fasterMethod = "метод Зейделя"
         elif mpiIterations < zeidelIterations:

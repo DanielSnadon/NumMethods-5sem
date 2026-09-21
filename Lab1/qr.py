@@ -139,7 +139,6 @@ def main():
 
     if hasComplexValues:
         numpySobstZnach = useNumPy(originalMatrix)
-
         printVector("Проверка комплексных собственных значений:", list(numpySobstZnach))
 
 if __name__ == "__main__":
