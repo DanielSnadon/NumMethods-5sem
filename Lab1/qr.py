@@ -114,30 +114,33 @@ def main():
         return
 
     data = loadInputData(sys.argv[1])
+
     originalMatrix = data["matrix"]
     epsilon = data["epsilon"]
-    complexExample = data["complexExample"]
     maxIterations = data["maxIterations"]
 
     vectorMatrix, upperMatrix = qr(originalMatrix)
     temp = multiplyMatrix(vectorMatrix, upperMatrix)
 
-    sobstZnach, iterations, finalMatrix = qrWrap(originalMatrix, epsilon, data["maxIterations"])
+    sobstZnach, iterations, finalMatrix = qrWrap(originalMatrix, epsilon, maxIterations)
 
     printMatrix("Исходная матрица A:", originalMatrix)
     printMatrix("Матрица Q:", vectorMatrix)
     printMatrix("Матрица R:", upperMatrix)
     printMatrix("Произведение Q * R:", temp)
-    print(f"Максимальная ошибка Q * R = A: {matrixMaxDiff(temp, originalMatrix):.3e}")
+
+    print(f"Максимальная ошибка Q * R = A: " f"{matrixMaxDiff(temp, originalMatrix):.3e}")
+
     print(f"Количество QR-итераций: {iterations}")
     printMatrix("Итоговая матрица:", finalMatrix)
-    printVector("Собственные значения:", sobstZnach)
+    printVector("Собственные значения, найденные QR-алгоритмом:", sobstZnach)
 
-    complexSobstZnach, i, j = qrWrap(complexExample, epsilon, maxIterations)
-    printMatrix("Пример с комплексной парой:", complexExample)
-    printVector("Собственные значения, найденные QR-алгоритмом:", complexSobstZnach)
-    numpySobstZnach = useNumPy(complexExample)
-    printVector("Проверка собственных значений с помощью NumPy:", list(numpySobstZnach))
+    hasComplexValues = any(isinstance(value, complex) for value in sobstZnach)
+
+    if hasComplexValues:
+        numpySobstZnach = useNumPy(originalMatrix)
+
+        printVector("Проверка комплексных собственных значений:", list(numpySobstZnach))
 
 if __name__ == "__main__":
     main()
