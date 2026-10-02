@@ -1,0 +1,9 @@
+{
+  "coefficient": 5,
+  "constant": 1,
+  "interval": [0.5, 0.6],
+  "start": 0.6,
+  "epsilon": 0.0001,
+  "q": 0.3,
+  "maxIterations": 1000
+}
