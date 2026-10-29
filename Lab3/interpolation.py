@@ -66,7 +66,7 @@ def main():
             print(f"x[{i}] = {nodes[i]:.6f}, y[{i}] = {values[i]:.12f}")
 
         print("\nМногочлен Лагранжа:")
-        print("P_L(x) =")
+        print("L_n(x) =")
         for i in range(n):
             temp = f"({values[i]:.12g})"
             for j in range(n):
@@ -85,7 +85,7 @@ def main():
             print()
 
         print("\nМногочлен Ньютона:")
-        print("P_N(x) =")
+        print("P_n(x) =")
         skobkiText = ""
         for k in range(n):
             if k > 0:
@@ -98,8 +98,8 @@ def main():
         exact = func(xStar)
 
         print(f"\nx* = {xStar}")
-        print(f"Лагранж: P_L(x*) = {lagrange:.15f}")
-        print(f"Ньютон:  P_N(x*) = {newton:.15f}")
+        print(f"Лагранж: L_n(x*) = {lagrange:.15f}")
+        print(f"Ньютон:  P_n(x*) = {newton:.15f}")
         print(f"Исходная функция: f(x*) = {exact:.15f}")
         print(f"Погрешность Лагранжа: {abs(exact - lagrange):.12g}")
         print(f"Погрешность Ньютона:  {abs(exact - newton):.12g}")

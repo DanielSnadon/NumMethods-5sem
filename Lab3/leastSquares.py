@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 def solveLU(matrix, rightSide):
     n = len(matrix)
     lu = [row.copy() for row in matrix]
-    permutedRight = rightSide.copy()
+    right = rightSide.copy()
 
     for k in range(n):
         pivot = k
@@ -14,10 +14,10 @@ def solveLU(matrix, rightSide):
                 pivot = i
 
         if lu[pivot][k] == 0:
-            raise ValueError("Ошибка: система вырождена: коэффициенты нельзя найти однозначно.\n")
+            raise ValueError("Ошибка LU: система вырождена.\n")
 
         lu[k], lu[pivot] = lu[pivot], lu[k]
-        permutedRight[k], permutedRight[pivot] = permutedRight[pivot], permutedRight[k]
+        right[k], right[pivot] = right[pivot], right[k]
 
         for i in range(k + 1, n):
             lu[i][k] /= lu[k][k]
@@ -26,7 +26,7 @@ def solveLU(matrix, rightSide):
 
     z = [0.0] * n
     for i in range(n):
-        z[i] = permutedRight[i]
+        z[i] = right[i]
         for j in range(i):
             z[i] -= lu[i][j] * z[j]
 
@@ -103,8 +103,8 @@ def main():
 
         sum = 0.0
         for i in range(len(nodes)):
-            residual = polyValue(coefficients, nodes[i]) - values[i]
-            sum += residual**2
+            skobki = polyValue(coefficients, nodes[i]) - values[i]
+            sum += skobki**2
         mse = sum / len(nodes)
         errors.append(mse)
         print(f"Сумма квадратов ошибок sum = {sum:.12g}")

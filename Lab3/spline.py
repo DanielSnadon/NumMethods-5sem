@@ -2,24 +2,24 @@ import json
 import matplotlib.pyplot as plt
 
 
-def progonka(lower, diagonal, upper, rightSide):
+def progonka(lower, diagonal, upper, b):
     n = len(diagonal)
-    alpha = [0.0] * n
-    beta = [0.0] * n
-    alpha[0] = -upper[0] / diagonal[0]
-    beta[0] = rightSide[0] / diagonal[0]
+    p = [0.0] * n
+    q = [0.0] * n
+    p[0] = -upper[0] / diagonal[0]
+    q[0] = b[0] / diagonal[0]
     
     for i in range(1, n):
-        denominator = diagonal[i] + lower[i] * alpha[i - 1]
+        denominator = diagonal[i] + lower[i] * p[i - 1]
         if denominator == 0:
             raise ValueError("Ошибка метода прогонки: нулевой знаменатель.\n")
-        alpha[i] = -upper[i] / denominator
-        beta[i] = (rightSide[i] - lower[i] * beta[i - 1]) / denominator
+        p[i] = -upper[i] / denominator
+        q[i] = (b[i] - lower[i] * q[i - 1]) / denominator
 
     c = [0.0] * n
-    c[-1] = beta[-1]
+    c[-1] = q[-1]
     for i in range(n - 2, -1, -1):
-        c[i] = alpha[i] * c[i + 1] + beta[i]
+        c[i] = p[i] * c[i + 1] + q[i]
 
     return c
 
@@ -29,7 +29,7 @@ def buildSpline(nodes, values):
     if n < 2 or len(values) != n:
         raise ValueError("Ошибка: нужно хотя бы два узла и столько же значений.\n")
 
-    # h[i] — длина участка, m[i] — наклон прямой между его концами
+    # h[i] и m[i] -> заставляет задуматься.
     h = []
     m = []
     for i in range(n - 1):
@@ -39,7 +39,7 @@ def buildSpline(nodes, values):
     lower = [0.0] * n
     diagonal = [0.0] * n
     upper = [0.0] * n
-    rightSide = [0.0] * n
+    b = [0.0] * n
     diagonal[0] = 1.0
     diagonal[-1] = 1.0
 
@@ -47,9 +47,9 @@ def buildSpline(nodes, values):
         lower[i] = h[i - 1]
         diagonal[i] = 2 * (h[i - 1] + h[i])
         upper[i] = h[i]
-        rightSide[i] = 3 * (m[i] - m[i - 1])
+        b[i] = 3 * (m[i] - m[i - 1])
 
-    c = progonka(lower, diagonal, upper, rightSide)
+    c = progonka(lower, diagonal, upper, b)
 
     a = []
     b = []
@@ -62,7 +62,7 @@ def buildSpline(nodes, values):
     return a, b, c, d
 
 
-def splineValue(nodes, a, b, c, d, x):
+def getValue(nodes, a, b, c, d, x):
     if x < nodes[0] or x > nodes[-1]:
         raise ValueError("Ошибка: точка должна находиться между крайними узлами.\n")
     
@@ -95,9 +95,9 @@ def main():
         print(f"\nУчасток {i+1}: [{nodes[i]}; {nodes[i+1]}]")
         print(f"a = {a[i]:.12g}, b = {b[i]:.12g}, c = {c[i]:.12g}, d = {d[i]:.12g}")
         print(f"t = x - ({nodes[i]})")
-        print(f"S(x) = ({a[i]:.12g}) + ({b[i]:.12g})*t + ({c[i]:.12g})*t² + ({d[i]:.12g})*t³")
+        print(f"S(x) = ({a[i]:.12g}) + ({b[i]:.12g})*t + ({c[i]:.12g})*t^2 + ({d[i]:.12g})*t^3")
 
-    result, interval = splineValue(nodes, a, b, c, d, xStar)
+    result, interval = getValue(nodes, a, b, c, d, xStar)
     print(f"\nx* = {xStar}, S(x*) = {result:.15f}")
     print(f"Номер участка: {interval+1}, индекс Python: {interval}")
     print(f"Интервал: [{nodes[interval]}; {nodes[interval+1]}]")
@@ -114,7 +114,7 @@ def main():
     secondRight = 2*c[last] + 6*d[last]*(nodes[-1] - nodes[-2])
     print("\nВторые производные на концах:")
     print(f"S''(x_0) = {secondLeft:.12g}")
-    print(f"S''(x_last) = {secondRight:.12g}")
+    print(f"S''(x_n) = {secondRight:.12g}")
 
     # График
     for i in range(len(nodes) - 1):
