@@ -85,15 +85,15 @@ def solveAdams(nodes, h):
 
 def makeGrid(h):
     if not math.isfinite(h) or h <= 0:
-        raise ValueError("Шаг h должен быть конечным положительным числом.")
+        raise ValueError("Ошибка makeGrid: шаг h должен быть конечным положительным числом.")
     
     n = round((xEnd - xStart) / h)
 
     if not math.isclose(n*h, xEnd - xStart, rel_tol=1e-12, abs_tol=1e-12):
-        raise ValueError("Шаг h должен разбивать [2; 3] на целое число участков.")
+        raise ValueError("Ошибка makeGrid: шаг h должен разбивать [2; 3] на целое число участков.")
     
     if n < 4:
-        raise ValueError("Нужно минимум четыре шага: три для старта и один для Адамса.")
+        raise ValueError("Ошибка makeGrid: нужно минимум четыре шага: три для старта и один для Адамса.")
     
     return [xStart + i*h for i in range(n)] + [xEnd]
 
@@ -106,11 +106,10 @@ def solve(nodes, h):
     ]
 
 
-def printTable(nodes, coarse, fine):
-    for (name, order, (y, z)), (_, _, (goodY, _)) in zip(coarse, fine):
+def printTable(nodes, badGrid, goodGrid):
+    for (name, order, (y, z)), (_, _, (goodY, _)) in zip(badGrid, goodGrid):
         print(f"\n{name}, порядок p = {order}")
-        print(f"{'x':>6} {'y(h)':>13} {'z(h)':>13} {'точное y':>13} "
-              f"{'y(h/2)':>13} {'ошибка h':>12} {'ошибка h/2':>12} {'РР для h/2':>12}")
+        print(f"{'x':>6} {'y(h)':>13} {'z(h)':>13} {'точное y':>13} "f"{'y(h/2)':>13} {'ошибка h':>12} {'ошибка h/2':>12} {'РР для h/2':>12}")
 
         badGridErrors, goodGridErrors, delta = [], [], []
         for i, x in enumerate(nodes):
@@ -120,12 +119,9 @@ def printTable(nodes, coarse, fine):
             goodGridErrors.append(abs(goodGridValue - exact))
             delta.append(abs(goodGridValue - y[i]) / (2**order - 1))
 
-            print(f"{x:6.3f} {y[i]:13.9f} {z[i]:13.9f} {exact:13.9f} "
-                  f"{goodGridValue:13.9f} {badGridErrors[-1]:12.3e} "
-                  f"{goodGridErrors[-1]:12.3e} {delta[-1]:12.3e}")
+            print(f"{x:6.3f} {y[i]:13.9f} {z[i]:13.9f} {exact:13.9f} "f"{goodGridValue:13.9f} {badGridErrors[-1]:12.3e} "f"{goodGridErrors[-1]:12.3e} {delta[-1]:12.3e}")
 
-        print(f"Максимумы на общих узлах: ошибка h = {max(badGridErrors):.3e}; "
-              f"ошибка h/2 = {max(goodGridErrors):.3e}; оценка РР = {max(delta):.3e}")
+        print(f"Максимумы на общих узлах: ошибка h = {max(badGridErrors):.3e}; "f"ошибка h/2 = {max(goodGridErrors):.3e}; оценка РР = {max(delta):.3e}")
 
 
 def drawGraphs(nodes, solutions, h, folder, show):
@@ -170,12 +166,14 @@ def main():
         h = float(json.load(file)["h"])
 
     nodes, goodNodes = makeGrid(h), makeGrid(h/2)
-    coarse, fine = solve(nodes, h), solve(goodNodes, h/2)
+    badGrid, goodGrid = solve(nodes, h), solve(goodNodes, h/2)
 
     print(f"Вариант 20: h = {h:g}, h/2 = {h/2:g}")
     print("Начальная задача: y(2) = sqrt(2), y'(2) = 3*sqrt(2)/2.")
-    printTable(nodes, coarse, fine)
-    drawGraphs(nodes, coarse, h, folder, args.show)
+    
+    printTable(nodes, badGrid, goodGrid)
+    drawGraphs(nodes, badGrid, h, folder, args.show)
+
     print("\nГрафики сохранены: koshi_solution.png, koshi_error.png.")
 
 
